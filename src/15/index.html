@@ -11,25 +11,6 @@
 <script src="../vue.js"></script>
 <script src="../js.cookie.min.js"></script>
 
-
-<script>
-function generate_bet_link(bet, betNum) {
-  if (typeof vm === 'undefined') return '';
-  var urlString = 'http://www.neopets.com/pirates/process_foodclub.phtml?'
-  for (var i=0; i < 5; i++) {
-    if (bet[i] != 0) urlString += 'winner'+(i+1)+'='+vm.pirates[i][bet[i]-1]+'&'
-  }
-  for (var i=0; i < 5; i++) {
-    if (bet[i] != 0) urlString += 'matches[]='+(i+1)+'&'
-  }
-  urlString += 'bet_amount='+vm.betAmounts[betNum]+'&'
-  urlString += 'total_odds='+vm.betOdds[betNum]+'&'
-  urlString += 'winnings='+vm.betPayoffs[betNum]+'&'
-  urlString += 'type=bet'
-  return "window.open('"+urlString+"')"
-}
-</script>
-
 <div id="el">
     <label>Round
         <input id="round-number" type="number" min="1" max="99999" style="width: 60px" v-model="round">

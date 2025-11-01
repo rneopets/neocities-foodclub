@@ -151,6 +151,22 @@ function check_radio(arena_id, pirate_row, bet_number) {
     .trigger("click");
 }
 
+function generate_bet_link(bet, betNum) {
+  if (typeof vm === 'undefined') return '';
+  var urlString = 'http://www.neopets.com/pirates/process_foodclub.phtml?';
+  for (var i=0; i < 5; i++) {
+    if (bet[i] != 0) urlString += 'winner'+(i+1)+'='+vm.pirates[i][bet[i]-1]+'&';
+  }
+  for (var i=0; i < 5; i++) {
+    if (bet[i] != 0) urlString += 'matches[]='+(i+1)+'&';
+  }
+  urlString += 'bet_amount='+vm.betAmounts[betNum]+'&';
+  urlString += 'total_odds='+vm.betOdds[betNum]+'&';
+  urlString += 'winnings='+vm.betPayoffs[betNum]+'&';
+  urlString += 'type=bet';
+  return "window.open('"+urlString+"')";
+}
+
 // Adds MAX TER button to the top of the page and sets an on-click action to call the main method
 $("input#maxter").on("click", calc_maxter);
 
