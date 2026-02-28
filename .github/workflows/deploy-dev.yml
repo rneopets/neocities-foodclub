@@ -1,10 +1,7 @@
 name: Deploy to Dev
 
 on:
-  push:
-    branches:
-      - dev  # Trigger on pushes to dev branch
-  workflow_dispatch:  # Allow manual trigger
+  workflow_dispatch:  # Deploy from any branch via manual trigger
 
 jobs:
   deploy:
