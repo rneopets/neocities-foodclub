@@ -188,3 +188,6 @@ $("td").on("click", function () {
 $("td *").on("click", function (event) {
   event.stopPropagation();
 });
+
+// Expose generate_bet_link to Vue template (templates only see instance methods)
+if (typeof vm !== "undefined") vm.generate_bet_link = generate_bet_link;
