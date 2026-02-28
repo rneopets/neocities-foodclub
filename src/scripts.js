@@ -143,9 +143,9 @@ function calc_maxter() {
       97 + parseInt(result.substring(i, i + 2), 5)
     );
   }
-  // Reload the page with the new bets
-  window.location =
-    window.location.href + "#round=" + parseInt(vm.round) + "&b=" + linkCode;
+  // Reload the page with the new bets (use base URL to avoid hash appending)
+  var base = window.location.origin + window.location.pathname + window.location.search;
+  window.location = base + "#round=" + parseInt(vm.round) + "&b=" + linkCode;
 }
 
 function check_radio(arena_id, pirate_row, bet_number) {
