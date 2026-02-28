@@ -2871,6 +2871,9 @@ function install(t) {
             expires: 28,
           });
       },
+      setBetsFromLinkCode: function (t) {
+        this.bets = v(t);
+      },
     },
     computed: h,
   })).$watch("round", l, {
