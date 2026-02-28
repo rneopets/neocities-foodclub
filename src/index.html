@@ -38,8 +38,6 @@
             <td><label>Dropdown Mode: <input type="radio" v-model="displayMode" value="dropdown"></label></td>
         </tr>
     </table>
-    <!--<p><a href="https://foodclub.neocities.org/15/">Place 15 bets here!</a></p>-->
-
     <p><input id="maxter" type="button" value="Max TER"/></p>
 
     <table border="1" v-show="displayMode!=='dropdown'" v-if="!isLoading">
@@ -304,8 +302,25 @@
     <textarea class="nfctextarea" onclick="this.select();document.execCommand('copy')" readonly>{{redditStatsString}}</textarea><br><br>
 </div>
 
-<script src="neofoodclub.min.js"></script>
-<script src="install.js"></script>
+<script>
+  (function () {
+    var maxBets = 10;
+    try {
+      var hash = window.location.hash || "";
+      var bMatch = hash.match(/[?&]b=([^&]*)/);
+      if (bMatch && bMatch[1].length > 25) maxBets = 15;
+    } catch (e) {}
+
+    var pollIntervalMs = maxBets >= 15 ? 60000 : 10000;
+
+    window.NFC_CONFIG = {
+      maxBets: maxBets,
+      pollIntervalMs: pollIntervalMs,
+    };
+  })();
+</script>
+
+<script src="neofoodclub.js"></script>
 <script src="scripts.js"></script>
 <hr>
 <span style="font-size: 12px">

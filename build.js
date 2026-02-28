@@ -35,25 +35,18 @@ const minifyHTML = (inp, out) => {
 
 console.log("Building...\n");
 const srcDir = path.join(__dirname, "src");
-const dist15 = path.join(distDir, "15");
-if (!fs.existsSync(dist15)) fs.mkdirSync(dist15, { recursive: true });
 
 const files = [
-  "neofoodclub.min.js",
+  "neofoodclub.js",
   "scripts.js",
-  "install.js",
   "style.css",
   "index.html",
-  "15/scripts_15.js",
-  "15/neofoodclub_15.min.js",
-  "15/index.html",
 ];
 
 for (const file of files) {
   const srcPath = path.join(srcDir, file);
   if (fs.existsSync(srcPath)) {
-    const outDir = file.startsWith("15/") ? dist15 : distDir;
-    const outPath = path.join(outDir, path.basename(file));
+    const outPath = path.join(distDir, path.basename(file));
     if (file.endsWith(".js")) {
       minifyJS(srcPath, outPath);
     } else if (file.endsWith(".css")) {

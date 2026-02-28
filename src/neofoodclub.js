@@ -1,352 +1,2948 @@
-Function.prototype.arg = function () {
-  if (typeof this !== "function")
-    throw new TypeError(
-      "Function.prototype.arg needs to be called on a function"
+/**
+ * neofoodclub.js
+ *
+ * Source file for the deployed bundle.
+ */
+function t() {
+  var r = null,
+    n = null;
+  return {
+    promise: new Promise(function (t, e) {
+      (r = t), (n = e);
+    }),
+    resolve: r,
+    reject: n,
+  };
+}
+
+function e(t, e, r) {
+  for (var n in r) {
+    var i = n,
+      a = r[n];
+    "ready" === i ? a() : google.visualization.events.addListener(e, i, a);
+  }
+}
+
+var a = !1,
+  s = !1,
+  o = t();
+
+function r() {
+  var e =
+      0 < arguments.length && void 0 !== arguments[0]
+        ? arguments[0]
+        : ["corechart"],
+    r =
+      1 < arguments.length && void 0 !== arguments[1]
+        ? arguments[1]
+        : "current",
+    n = 2 < arguments.length && void 0 !== arguments[2] && arguments[2],
+    i = 3 < arguments.length && void 0 !== arguments[3] ? arguments[3] : "en";
+  if (!Array.isArray(e)) {
+    throw new TypeError("packages must be an array");
+  }
+  if ("current" !== r && "number" != typeof r && "upcoming" !== r) {
+    throw new TypeError('version must be a number, "upcoming" or "current"');
+  }
+  if (a || s) {
+    return o.promise;
+  }
+  a = !0;
+  var t = document.createElement("script");
+  return (
+    t.setAttribute("src", "https://www.gstatic.com/charts/loader.js"),
+    (t.onreadystatechange = t.onload =
+      function () {
+        var t = {
+          packages: e,
+          language: i,
+        };
+        n && (t.mapsApiKey = n),
+          google.charts.load(r, t),
+          google.charts.setOnLoadCallback(function () {
+            (s = !(a = !1)), o.resolve();
+          });
+      }),
+    document.getElementsByTagName("head")[0].appendChild(t),
+    o.promise
+  );
+}
+
+function n(t, e) {
+  for (var r in e) {
+    var n = e[r].type;
+    t.$watch(
+      r,
+      function () {
+        t.drawChart();
+      },
+      {
+        deep: n === Object,
+      }
     );
-  var slice = Array.prototype.slice,
-    args = slice.call(arguments),
-    fn = this,
-    partial = function () {
-      return fn.apply(this, args.concat(slice.call(arguments)));
+  }
+}
+
+var i = {
+    packages: {
+      type: Array,
+      default: function () {
+        return ["corechart"];
+      },
+    },
+    version: {
+      default: "current",
+    },
+    mapsApiKey: {
+      default: !1,
+    },
+    language: {
+      type: String,
+      default: "en",
+    },
+    chartType: {
+      type: String,
+      default: function () {
+        return "LineChart";
+      },
+    },
+    chartEvents: {
+      type: Object,
+      default: function () {
+        return {};
+      },
+    },
+    columns: {
+      required: !0,
+      type: Array,
+    },
+    rows: {
+      type: Array,
+      default: function () {
+        return [];
+      },
+    },
+    options: {
+      type: Object,
+      default: function () {
+        return {
+          chart: {
+            title: "Chart Title",
+            subtitle: "Subtitle",
+          },
+          hAxis: {
+            title: "X Label",
+          },
+          vAxis: {
+            title: "Y Label",
+          },
+          width: "400px",
+          height: "300px",
+          animation: {
+            duration: 500,
+            easing: "out",
+          },
+        };
+      },
+    },
+  },
+  u = {};
+
+u.rows = i.rows;
+
+var h = {
+  name: "vue-chart",
+  props: i,
+  render: function (t) {
+    return t(
+      "div",
+      {
+        class: "vue-chart-container",
+      },
+      [
+        t("div", {
+          attrs: {
+            id: this.chartId,
+            class: "vue-chart",
+          },
+        }),
+      ]
+    );
+  },
+  data: function () {
+    return {
+      chart: null,
+      chartId: "X" + this._uid,
+      wrapper: null,
+      chartDeferred: t(),
+      dataTable: [],
+      hiddenColumns: [],
     };
-  partial.prototype = Object.create(this.prototype);
-  return partial;
+  },
+  events: {
+    redrawChart: function () {
+      this.drawChart();
+    },
+  },
+  mounted: function () {
+    var t = this;
+    r(t.packages, t.version, t.mapsApiKey, t.language)
+      .then(t.drawChart)
+      .then(function () {
+        n(t, u), e(t, t.chart, t.chartEvents);
+      })
+      .catch(function (t) {
+        throw t;
+      });
+  },
+  methods: {
+    buildDataTable: function () {
+      var e = new google.visualization.DataTable();
+      return (
+        this.columns.forEach(function (t) {
+          e.addColumn(t);
+        }),
+        this.rows && this.rows.length && e.addRows(this.rows),
+        e
+      );
+    },
+    updateDataTable: function () {
+      var e = this;
+      e.dataTable.removeRows(0, e.dataTable.getNumberOfRows()),
+        e.dataTable.removeColumns(0, e.dataTable.getNumberOfColumns()),
+        e.columns.forEach(function (t) {
+          e.dataTable.addColumn(t);
+        }),
+        e.rows && e.rows.length && e.dataTable.addRows(e.rows);
+    },
+    buildWrapper: function (t, e, r, n) {
+      return new google.visualization.ChartWrapper({
+        chartType: t,
+        dataTable: e,
+        options: r,
+        containerId: n,
+      });
+    },
+    buildChart: function () {
+      var t = this,
+        e =
+          t.dataTable && t.dataTable.length ? t.dataTable : t.buildDataTable();
+      (t.wrapper = t.buildWrapper(t.chartType, e, t.options, t.chartId)),
+        (t.dataTable = t.wrapper.getDataTable()),
+        google.visualization.events.addOneTimeListener(
+          t.wrapper,
+          "ready",
+          function () {
+            (t.chart = t.wrapper.getChart()), t.chartDeferred.resolve();
+          }
+        ),
+        google.visualization.events.addListener(
+          t.wrapper,
+          "error",
+          function () {
+            console.log(JSON.stringify(arguments)), t.chartDeferred.reject();
+          }
+        );
+    },
+    drawChart: function () {
+      var t = this;
+      if (t.rows && t.rows.length && t.columns && t.columns.length) {
+        return (
+          t.chart ? t.updateDataTable() : t.buildChart(),
+          t.wrapper.draw(),
+          t.chartDeferred.promise
+        );
+      }
+    },
+  },
 };
 
-var vm;
-
-function install(startData) {
-  var pirateNames = {
-    5: "Edmund",
-    1: "Dan",
-    8: "Puffo",
-    3: "Orvinn",
-
-    17: "Federismo",
-    18: "Blackbeard",
-    13: "Ned",
-    11: "Crossblades",
-
-    6: "Peg Leg",
-    20: "Tailhook",
-    4: "Lucky",
-    15: "Gooblah",
-
-    7: "Bonnie",
-    19: "Buck",
-    2: "Sproggie",
-    10: "Squire",
-
-    12: "Stripey",
-    9: "Stuff",
-    16: "Franchisco",
-    14: "Fairfax",
-  };
-
-  var numBets = 10;
-
-  var data = {
-    //    numBets: numBets,
-    arenas: ["Shipwreck", "Lagoon", "Treasure", "Hidden", "Harpoon"],
-    possiblePirateNames: pirateNames,
-    bets: {},
-    betAmounts: {},
-    dropdownMode: false,
-    showOddsTimeline: false,
-    moveFrom: 0,
-    moveTo: 0,
-    moveMode: "none",
-    isLoading: false,
-
-    /*
-                probabilities: {
-                    min: [[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0]],
-                    avg: [[1,0.5,0.5,0.5,0.5],[1,0.5,0.5,0.5,0.5],[1,0.5,0.5,0.5,0.5],[1,0.5,0.5,0.5,0.5],[1,0.5,0.5,0.5,0.5]],
-                    max: [[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1]]
-                },
-        */
-  };
-
-  for (var key in startData) {
-    data[key] = startData[key];
+function d(t, e) {
+  for (var r = 0; r < 5; r++) {
+    t.push(e[r]);
   }
+  return t;
+}
 
-  var queryData = (function () {
-    var result = {},
-      queryString = window.location.hash.slice(1),
-      re = /([^&=]+)=([^&]*)/g,
-      m;
+function c(t, e, r) {
+  return (
+    r % 5 == 0 && t.push([0, 0, 0, 0, -1]),
+    (t[t.length - 1][r % 5] = e),
+    t
+  );
+}
 
-    while ((m = re.exec(queryString))) {
-      try {
-        result[decodeURIComponent(m[1])] = JSON.parse(decodeURIComponent(m[2]));
-      } catch (e) {
-        result[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+function l(t, e, r) {
+  return r % 2 == 0 ? t.push(5 * e) : (t[t.length - 1] += e), t;
+}
+
+function f(t, e) {
+  return t.push(Math.floor(e / 5)), t.push(e % 5), t;
+}
+
+function b(t) {
+  return "abcdefghijklmnopqrstuvwxy"[t];
+}
+
+function p(t) {
+  return "abcdefghijklmnopqrstuvwxy".indexOf(t);
+}
+
+function m(e) {
+  return Object.keys(e)
+    .sort(function (t, e) {
+      return t - e;
+    })
+    .map(function (t) {
+      return e[t];
+    })
+    .reduce(d, [])
+    .reduce(l, [])
+    .map(b)
+    .join("");
+}
+
+function v(t) {
+  return t
+    .split("")
+    .map(p)
+    .reduce(f, [])
+    .reduce(c, [])
+    .reduce(function (t, e, r) {
+      return 0 <= e[4] && (t[r + 1] = e), t;
+    }, {});
+}
+
+function g(t) {
+  var e = "";
+  t = ((parseInt(t) || 0) % 70304) + 70304;
+  for (var r = 0; r < 3; r++) {
+    var n = t % 52;
+    (e = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"[n] + e),
+      (t = (t - n) / 52);
+  }
+  return e;
+}
+
+function w(t) {
+  for (var e = 0, r = 0; r < t.length; r++) {
+    e *= 52;
+    var n = t[r];
+    e += "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".indexOf(n);
+  }
+  return e - 70304;
+}
+
+function y(e) {
+  return Object.keys(e)
+    .sort(function (t, e) {
+      return t - e;
+    })
+    .map(function (t) {
+      return e[t];
+    })
+    .map(g)
+    .join("");
+}
+
+function O(t) {
+  return t
+    .match(/.{1,3}/g)
+    .map(w)
+    .reduce(function (t, e, r) {
+      return (t[r + 1] = e), t;
+    }, {});
+}
+
+Vue.component("vue-chart", h);
+
+var vm,
+  A = {
+    1: {
+      1: 2,
+      2: 0,
+      3: 0,
+      4: 1,
+      5: 0,
+      6: 1,
+      7: 1,
+      8: 1,
+      9: 0,
+      10: 1,
+      11: 0,
+      12: 2,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 0,
+      18: 0,
+      19: 0,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 0,
+      24: 0,
+      25: 1,
+      26: 0,
+      27: 0,
+      28: 0,
+      29: 0,
+      30: 0,
+      31: 0,
+      32: 0,
+      33: 2,
+      34: 0,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 0,
+      39: 0,
+      40: 0,
+    },
+    2: {
+      1: 1,
+      2: 0,
+      3: 0,
+      4: 1,
+      5: 1,
+      6: 1,
+      7: 1,
+      8: 1,
+      9: 0,
+      10: 1,
+      11: 0,
+      12: 1,
+      13: 1,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 0,
+      18: 0,
+      19: 0,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 0,
+      24: 0,
+      25: 0,
+      26: 0,
+      27: 0,
+      28: 0,
+      29: 0,
+      30: 0,
+      31: 0,
+      32: 0,
+      33: 1,
+      34: 0,
+      35: 1,
+      36: 1,
+      37: 0,
+      38: 0,
+      39: 0,
+      40: 0,
+    },
+    3: {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 0,
+      12: 0,
+      13: 0,
+      14: 1,
+      15: 1,
+      16: 1,
+      17: 1,
+      18: 1,
+      19: 1,
+      20: 1,
+      21: 1,
+      22: 1,
+      23: 0,
+      24: 0,
+      25: 0,
+      26: 0,
+      27: 0,
+      28: 1,
+      29: 0,
+      30: 0,
+      31: 0,
+      32: 1,
+      33: 0,
+      34: 1,
+      35: 0,
+      36: 0,
+      37: 1,
+      38: 0,
+      39: 0,
+      40: 1,
+    },
+    4: {
+      1: 0,
+      2: 0,
+      3: 1,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 1,
+      12: 0,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 1,
+      18: 0,
+      19: 0,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 0,
+      24: 0,
+      25: 1,
+      26: 0,
+      27: 0,
+      28: 1,
+      29: 0,
+      30: 0,
+      31: 0,
+      32: 0,
+      33: 0,
+      34: 0,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 0,
+      39: 1,
+      40: 1,
+    },
+    5: {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 0,
+      12: 0,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 0,
+      18: 1,
+      19: 0,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 1,
+      24: 1,
+      25: 0,
+      26: 0,
+      27: 0,
+      28: 0,
+      29: 1,
+      30: 0,
+      31: 1,
+      32: 0,
+      33: 0,
+      34: 0,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 1,
+      39: 1,
+      40: 0,
+    },
+    6: {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 1,
+      11: 0,
+      12: 0,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 0,
+      18: 0,
+      19: 0,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 0,
+      24: 0,
+      25: 0,
+      26: 1,
+      27: 1,
+      28: 0,
+      29: 0,
+      30: 0,
+      31: 0,
+      32: 0,
+      33: 0,
+      34: 1,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 0,
+      39: 0,
+      40: 0,
+    },
+    7: {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 0,
+      12: 0,
+      13: 0,
+      14: 1,
+      15: 1,
+      16: 1,
+      17: 0,
+      18: 0,
+      19: 0,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 1,
+      24: 1,
+      25: 0,
+      26: 0,
+      27: 0,
+      28: 1,
+      29: 0,
+      30: 0,
+      31: 1,
+      32: 1,
+      33: 0,
+      34: 0,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 1,
+      39: 0,
+      40: 0,
+    },
+    8: {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 0,
+      12: 0,
+      13: 0,
+      14: 1,
+      15: 1,
+      16: 1,
+      17: 0,
+      18: 0,
+      19: 0,
+      20: 1,
+      21: 1,
+      22: 1,
+      23: 1,
+      24: 1,
+      25: 0,
+      26: 0,
+      27: 0,
+      28: 1,
+      29: 0,
+      30: 0,
+      31: 1,
+      32: 1,
+      33: 0,
+      34: 0,
+      35: 0,
+      36: 0,
+      37: 1,
+      38: 1,
+      39: 0,
+      40: 0,
+    },
+    9: {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 0,
+      12: 0,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 1,
+      18: 1,
+      19: 1,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 0,
+      24: 0,
+      25: 0,
+      26: 0,
+      27: 0,
+      28: 0,
+      29: 0,
+      30: 0,
+      31: 0,
+      32: 0,
+      33: 0,
+      34: 1,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 0,
+      39: 0,
+      40: 1,
+    },
+    10: {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 1,
+      9: 1,
+      10: 0,
+      11: 0,
+      12: 0,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 0,
+      18: 0,
+      19: 0,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 0,
+      24: 0,
+      25: 0,
+      26: 0,
+      27: 0,
+      28: 0,
+      29: 1,
+      30: 0,
+      31: 0,
+      32: 1,
+      33: 0,
+      34: 0,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 0,
+      39: 0,
+      40: 0,
+    },
+    11: {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 0,
+      12: 0,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 1,
+      18: 1,
+      19: 1,
+      20: 1,
+      21: 1,
+      22: 1,
+      23: 0,
+      24: 0,
+      25: 0,
+      26: 0,
+      27: 0,
+      28: 0,
+      29: 0,
+      30: 0,
+      31: 0,
+      32: 0,
+      33: 0,
+      34: 1,
+      35: 0,
+      36: 0,
+      37: 1,
+      38: 0,
+      39: 0,
+      40: 1,
+    },
+    12: {
+      1: 1,
+      2: 0,
+      3: 0,
+      4: 1,
+      5: 0,
+      6: 1,
+      7: 1,
+      8: 1,
+      9: 0,
+      10: 1,
+      11: 0,
+      12: 1,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 0,
+      18: 0,
+      19: 0,
+      20: 1,
+      21: 1,
+      22: 1,
+      23: 0,
+      24: 0,
+      25: 0,
+      26: 0,
+      27: 0,
+      28: 0,
+      29: 0,
+      30: 0,
+      31: 0,
+      32: 0,
+      33: 1,
+      34: 0,
+      35: 0,
+      36: 0,
+      37: 1,
+      38: 0,
+      39: 0,
+      40: 0,
+    },
+    13: {
+      1: 1,
+      2: 0,
+      3: 0,
+      4: 1,
+      5: 0,
+      6: 1,
+      7: 1,
+      8: 1,
+      9: 0,
+      10: 1,
+      11: 0,
+      12: 1,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 0,
+      18: 0,
+      19: 0,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 0,
+      24: 0,
+      25: 0,
+      26: 0,
+      27: 0,
+      28: 0,
+      29: 0,
+      30: 0,
+      31: 0,
+      32: 0,
+      33: 1,
+      34: 0,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 0,
+      39: 0,
+      40: 0,
+    },
+    14: {
+      1: 0,
+      2: 1,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 1,
+      12: 0,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 0,
+      18: 1,
+      19: 1,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 1,
+      24: 1,
+      25: 0,
+      26: 1,
+      27: 1,
+      28: 0,
+      29: 1,
+      30: 1,
+      31: 0,
+      32: 0,
+      33: 0,
+      34: 1,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 0,
+      39: 0,
+      40: 0,
+    },
+    15: {
+      1: 1,
+      2: 0,
+      3: 0,
+      4: 1,
+      5: 0,
+      6: 1,
+      7: 1,
+      8: 1,
+      9: 0,
+      10: 1,
+      11: 0,
+      12: 1,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 0,
+      18: 0,
+      19: 0,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 0,
+      24: 0,
+      25: 0,
+      26: 0,
+      27: 0,
+      28: 0,
+      29: 0,
+      30: 0,
+      31: 0,
+      32: 0,
+      33: 1,
+      34: 0,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 0,
+      39: 0,
+      40: 0,
+    },
+    16: {
+      1: 1,
+      2: 0,
+      3: 0,
+      4: 1,
+      5: 0,
+      6: 1,
+      7: 1,
+      8: 1,
+      9: 0,
+      10: 2,
+      11: 0,
+      12: 1,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 0,
+      18: 0,
+      19: 0,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 0,
+      24: 0,
+      25: 0,
+      26: 1,
+      27: 1,
+      28: 0,
+      29: 0,
+      30: 0,
+      31: 0,
+      32: 0,
+      33: 1,
+      34: 1,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 0,
+      39: 0,
+      40: 0,
+    },
+    17: {
+      1: 0,
+      2: 0,
+      3: 1,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 1,
+      12: 0,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 2,
+      18: 1,
+      19: 1,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 0,
+      24: 0,
+      25: 1,
+      26: 0,
+      27: 0,
+      28: 1,
+      29: 0,
+      30: 0,
+      31: 0,
+      32: 0,
+      33: 0,
+      34: 1,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 0,
+      39: 1,
+      40: 2,
+    },
+    18: {
+      1: 0,
+      2: 1,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 1,
+      12: 0,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 0,
+      18: 1,
+      19: 1,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 1,
+      24: 1,
+      25: 0,
+      26: 1,
+      27: 1,
+      28: 0,
+      29: 1,
+      30: 1,
+      31: 0,
+      32: 0,
+      33: 0,
+      34: 1,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 0,
+      39: 0,
+      40: 0,
+    },
+    19: {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 0,
+      12: 0,
+      13: 0,
+      14: 1,
+      15: 1,
+      16: 1,
+      17: 0,
+      18: 0,
+      19: 0,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 0,
+      24: 0,
+      25: 0,
+      26: 0,
+      27: 0,
+      28: 1,
+      29: 0,
+      30: 0,
+      31: 0,
+      32: 1,
+      33: 0,
+      34: 0,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 0,
+      39: 0,
+      40: 0,
+    },
+    20: {
+      1: 0,
+      2: 1,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 0,
+      12: 0,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 0,
+      18: 1,
+      19: 0,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 0,
+      24: 0,
+      25: 0,
+      26: 1,
+      27: 1,
+      28: 0,
+      29: 0,
+      30: 1,
+      31: 0,
+      32: 0,
+      33: 0,
+      34: 1,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 0,
+      39: 0,
+      40: 0,
+    },
+  },
+  T = {
+    1: {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 0,
+      12: 0,
+      13: 0,
+      14: 1,
+      15: 1,
+      16: 1,
+      17: 0,
+      18: 0,
+      19: 0,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 0,
+      24: 0,
+      25: 0,
+      26: 0,
+      27: 0,
+      28: 1,
+      29: 0,
+      30: 0,
+      31: 0,
+      32: 1,
+      33: 0,
+      34: 0,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 0,
+      39: 0,
+      40: 0,
+    },
+    2: {
+      1: 0,
+      2: 0,
+      3: 1,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 1,
+      12: 0,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 1,
+      18: 0,
+      19: 0,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 0,
+      24: 0,
+      25: 1,
+      26: 0,
+      27: 0,
+      28: 1,
+      29: 0,
+      30: 0,
+      31: 0,
+      32: 0,
+      33: 0,
+      34: 0,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 0,
+      39: 1,
+      40: 1,
+    },
+    3: {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 1,
+      12: 0,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 0,
+      18: 0,
+      19: 1,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 1,
+      24: 1,
+      25: 0,
+      26: 0,
+      27: 0,
+      28: 0,
+      29: 1,
+      30: 0,
+      31: 0,
+      32: 0,
+      33: 0,
+      34: 0,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 0,
+      39: 0,
+      40: 0,
+    },
+    4: {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 0,
+      12: 0,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 1,
+      18: 1,
+      19: 1,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 0,
+      24: 0,
+      25: 0,
+      26: 0,
+      27: 0,
+      28: 0,
+      29: 0,
+      30: 0,
+      31: 0,
+      32: 0,
+      33: 0,
+      34: 1,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 0,
+      39: 0,
+      40: 1,
+    },
+    5: {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 1,
+      9: 1,
+      10: 0,
+      11: 0,
+      12: 0,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 0,
+      18: 0,
+      19: 0,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 0,
+      24: 0,
+      25: 0,
+      26: 0,
+      27: 0,
+      28: 0,
+      29: 1,
+      30: 0,
+      31: 0,
+      32: 1,
+      33: 0,
+      34: 0,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 0,
+      39: 0,
+      40: 0,
+    },
+    6: {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 0,
+      12: 0,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 0,
+      18: 0,
+      19: 0,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 1,
+      24: 1,
+      25: 0,
+      26: 0,
+      27: 0,
+      28: 0,
+      29: 0,
+      30: 0,
+      31: 1,
+      32: 0,
+      33: 0,
+      34: 0,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 1,
+      39: 0,
+      40: 0,
+    },
+    7: {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 1,
+      11: 0,
+      12: 0,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 0,
+      18: 0,
+      19: 0,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 0,
+      24: 0,
+      25: 0,
+      26: 1,
+      27: 1,
+      28: 0,
+      29: 0,
+      30: 0,
+      31: 0,
+      32: 0,
+      33: 0,
+      34: 1,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 0,
+      39: 0,
+      40: 0,
+    },
+    8: {
+      1: 1,
+      2: 0,
+      3: 0,
+      4: 1,
+      5: 0,
+      6: 1,
+      7: 1,
+      8: 1,
+      9: 0,
+      10: 1,
+      11: 0,
+      12: 1,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 0,
+      18: 0,
+      19: 0,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 0,
+      24: 0,
+      25: 0,
+      26: 0,
+      27: 0,
+      28: 0,
+      29: 0,
+      30: 0,
+      31: 0,
+      32: 0,
+      33: 1,
+      34: 0,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 0,
+      39: 0,
+      40: 0,
+    },
+    9: {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 1,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 0,
+      12: 0,
+      13: 1,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 0,
+      18: 0,
+      19: 0,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 0,
+      24: 0,
+      25: 0,
+      26: 0,
+      27: 0,
+      28: 0,
+      29: 0,
+      30: 0,
+      31: 0,
+      32: 0,
+      33: 0,
+      34: 0,
+      35: 1,
+      36: 1,
+      37: 0,
+      38: 0,
+      39: 0,
+      40: 0,
+    },
+    10: {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 1,
+      12: 0,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 0,
+      18: 0,
+      19: 1,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 1,
+      24: 1,
+      25: 0,
+      26: 0,
+      27: 0,
+      28: 0,
+      29: 1,
+      30: 0,
+      31: 0,
+      32: 0,
+      33: 0,
+      34: 0,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 0,
+      39: 0,
+      40: 0,
+    },
+    11: {
+      1: 1,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 0,
+      12: 1,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 0,
+      18: 0,
+      19: 0,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 0,
+      24: 0,
+      25: 1,
+      26: 0,
+      27: 0,
+      28: 0,
+      29: 0,
+      30: 0,
+      31: 0,
+      32: 0,
+      33: 1,
+      34: 0,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 0,
+      39: 0,
+      40: 0,
+    },
+    12: {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 1,
+      9: 1,
+      10: 0,
+      11: 0,
+      12: 0,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 0,
+      18: 0,
+      19: 0,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 0,
+      24: 0,
+      25: 0,
+      26: 0,
+      27: 0,
+      28: 0,
+      29: 1,
+      30: 0,
+      31: 0,
+      32: 1,
+      33: 0,
+      34: 0,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 0,
+      39: 0,
+      40: 0,
+    },
+    13: {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 0,
+      12: 0,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 0,
+      18: 1,
+      19: 0,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 1,
+      24: 1,
+      25: 0,
+      26: 0,
+      27: 0,
+      28: 0,
+      29: 1,
+      30: 0,
+      31: 1,
+      32: 0,
+      33: 0,
+      34: 0,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 1,
+      39: 1,
+      40: 0,
+    },
+    14: {
+      1: 1,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 0,
+      12: 1,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 0,
+      18: 0,
+      19: 0,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 0,
+      24: 0,
+      25: 1,
+      26: 0,
+      27: 0,
+      28: 0,
+      29: 0,
+      30: 0,
+      31: 0,
+      32: 0,
+      33: 1,
+      34: 0,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 0,
+      39: 0,
+      40: 0,
+    },
+    15: {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 0,
+      12: 0,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 0,
+      18: 0,
+      19: 0,
+      20: 1,
+      21: 1,
+      22: 1,
+      23: 0,
+      24: 0,
+      25: 0,
+      26: 0,
+      27: 0,
+      28: 0,
+      29: 0,
+      30: 0,
+      31: 0,
+      32: 0,
+      33: 0,
+      34: 0,
+      35: 0,
+      36: 0,
+      37: 1,
+      38: 0,
+      39: 0,
+      40: 0,
+    },
+    16: {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 0,
+      12: 0,
+      13: 0,
+      14: 1,
+      15: 1,
+      16: 1,
+      17: 0,
+      18: 0,
+      19: 0,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 0,
+      24: 0,
+      25: 0,
+      26: 0,
+      27: 0,
+      28: 1,
+      29: 0,
+      30: 0,
+      31: 0,
+      32: 1,
+      33: 0,
+      34: 0,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 0,
+      39: 0,
+      40: 0,
+    },
+    17: {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 0,
+      12: 0,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 0,
+      18: 0,
+      19: 0,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 1,
+      24: 1,
+      25: 0,
+      26: 0,
+      27: 0,
+      28: 0,
+      29: 0,
+      30: 0,
+      31: 1,
+      32: 0,
+      33: 0,
+      34: 0,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 1,
+      39: 0,
+      40: 0,
+    },
+    18: {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 0,
+      12: 0,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 0,
+      18: 1,
+      19: 0,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 1,
+      24: 1,
+      25: 0,
+      26: 0,
+      27: 0,
+      28: 0,
+      29: 1,
+      30: 0,
+      31: 1,
+      32: 0,
+      33: 0,
+      34: 0,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 1,
+      39: 1,
+      40: 0,
+    },
+    19: {
+      1: 0,
+      2: 1,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 0,
+      12: 0,
+      13: 0,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 0,
+      18: 1,
+      19: 0,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 0,
+      24: 0,
+      25: 0,
+      26: 1,
+      27: 1,
+      28: 0,
+      29: 0,
+      30: 1,
+      31: 0,
+      32: 0,
+      33: 0,
+      34: 1,
+      35: 0,
+      36: 0,
+      37: 0,
+      38: 0,
+      39: 0,
+      40: 0,
+    },
+    20: {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 1,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 0,
+      12: 0,
+      13: 1,
+      14: 0,
+      15: 0,
+      16: 0,
+      17: 0,
+      18: 0,
+      19: 0,
+      20: 0,
+      21: 0,
+      22: 0,
+      23: 0,
+      24: 0,
+      25: 0,
+      26: 0,
+      27: 0,
+      28: 0,
+      29: 0,
+      30: 0,
+      31: 0,
+      32: 0,
+      33: 0,
+      34: 0,
+      35: 1,
+      36: 1,
+      37: 0,
+      38: 0,
+      39: 0,
+      40: 0,
+    },
+  };
+
+function x() {
+  for (var t = [], e = 0; e < this.arenas.length; e++) {
+    t[e] = [];
+    for (var r = 0; r < this.pirates[e].length; r++) {
+      for (var n = (t[e][r] = 0); n < this.foods[e].length; n++) {
+        (t[e][r] += A[this.pirates[e][r]][this.foods[e][n]]),
+          (t[e][r] -= T[this.pirates[e][r]][this.foods[e][n]]);
       }
     }
+  }
+  return t;
+}
 
-    history.pushState("", document.title, window.location.pathname);
-
-    return result;
-  })();
-  for (var key in queryData) {
-    if (key == "b") {
-      var betStr = queryData["b"];
-      var bets = betStrToBets(betStr);
-      data["bets"] = bets;
-      continue;
+function C() {
+  for (var t = [], e = [], r = [], n = 0; n < this.arenas.length; n++) {
+    (t[n] = []), (e[n] = []), (r[n] = []);
+    for (var i = 0; i < this.pirates[n].length; i++) {
+      (t[n][i] = []),
+        (e[n][i] = new Date(this.start)),
+        (r[n][i] = this.openingOdds[n][i + 1].toString());
     }
-    data[key] = queryData[key];
   }
-
-  function getMaxBet(baseMaxBet, round) {
-    return baseMaxBet + 2 * round;
-  }
-  function getBaseMaxBet(maxBet, round) {
-    return maxBet - 2 * round;
-  }
-
-  var baseMaxBet = window.Cookies.getJSON("baseMaxBet");
-  if (baseMaxBet === undefined) {
-    data.maxBet = -1000;
-  } else {
-    data.maxBet = getMaxBet(baseMaxBet, data.round);
-  }
-
-  function unFlattenData(keyword) {
-    var returnValue = {};
-    for (var key in this) {
-      var s = key.split(",");
-      if (s.length !== 2 || s[0] !== keyword) {
+  if (this.changes) {
+    for (var a = 0; a < this.changes.length; a++) {
+      if (!this.changes[a]) {
         continue;
       }
-      returnValue[s[1]] = this[key];
+      var s = this.changes[a],
+        o = s.arena,
+        u = s.pirate - 1,
+        h = new Date(s.t),
+        d = s.new.toString();
+      t[o][u].push([
+        this.pirates[o][u].toString(),
+        r[o][u],
+        r[o][u],
+        e[o][u],
+        h,
+      ]),
+        (e[o][u] = h),
+        (r[o][u] = d);
     }
-    return returnValue;
   }
+  for (n = 0; n < this.arenas.length; n++) {
+    for (i = 0; i < this.pirates[n].length; i++) {
+      t[n][i].push([
+        this.pirates[n][i].toString(),
+        r[n][i],
+        r[n][i],
+        e[n][i],
+        new Date(this.timestamp),
+      ]);
+    }
+  }
+  return t;
+}
 
-  var computedProperties = {
-    betEnabled: unFlattenData.arg("betEnabled"),
-    betOdds: unFlattenData.arg("betOdds"),
-    betPayoffs: unFlattenData.arg("betPayoff"),
-    betProbabilities: unFlattenData.arg("betProbability"),
-    betExpectedRatios: unFlattenData.arg("betExpectedRatio"),
-    betNetExpected: unFlattenData.arg("betNetExpected"),
-    betMaxBets: unFlattenData.arg("betMaxBet"),
-    pirateFAs: computePirateFAs,
-    pirateOddsTimelines: computePirateOddsTimelines,
-    piratePayouts: computePiratePayouts,
-    arenaRatios: computeArenaRatios,
-    totalAmount: computeTotalAmount,
-    TER: computeTER,
-    totalNetExpected: computeTotalNetExpected,
-    probabilities: computeProbabilities,
-    payoutTables: computePayoutTables,
-    directURL: computeDirectURL,
-    redditString: computeRedditString,
-    redditStatsString: computeRedditStatsString,
-  };
-
-  function moveBets() {
-    var moveFrom = this.moveFrom;
-    var moveTo = this.moveTo;
-    if (
-      this.moveMode !== "none" &&
-      moveFrom != moveTo &&
-      this.betEnabled[moveFrom] &&
-      this.betEnabled[moveTo]
-    ) {
-      if (this.moveMode === "swap") {
-        var movedBet = this.bets[moveFrom];
-        var movedAmount = this.betAmounts[moveFrom];
-        this.bets[moveFrom] = this.bets[moveTo];
-        this.betAmounts[moveFrom] = this.betAmounts[moveTo];
-        this.bets[moveTo] = movedBet;
-        this.betAmounts[moveTo] = movedAmount;
-      } else if (this.moveMode === "insert") {
-        var movedBet = this.bets[moveFrom];
-        var movedAmount = this.betAmounts[moveFrom];
-        var order = moveFrom < moveTo ? 1 : -1;
-        for (var i = moveFrom; i != moveTo; i += order) {
-          this.bets[i] = this.bets[i + order];
-          this.betAmounts[i] = this.betAmounts[i + order];
-        }
-        this.bets[moveTo] = movedBet;
-        this.betAmounts[moveTo] = movedAmount;
+function E() {
+  for (
+    var t = {
+        min: [],
+        std: [],
+        max: [],
+        used: [],
+      },
+      e = 0;
+    e < this.arenas.length;
+    e++
+  ) {
+    (t.min[e] = []),
+      (t.max[e] = []),
+      (t.std[e] = []),
+      (t.used[e] = []),
+      (t.min[e][0] = 1),
+      (t.max[e][0] = 1),
+      (t.std[e][0] = 1);
+    var r,
+      n = 0,
+      i = 0;
+    for (r = t.used[e][0] = 1; r <= this.pirates[e].length; r++) {
+      var a = this.openingOdds[e][r];
+      (t.max[e][r] =
+        13 == a
+          ? ((t.min[e][r] = 0), 1 / 13)
+          : 2 == a
+          ? ((t.min[e][r] = 1 / 3), 1)
+          : ((t.min[e][r] = 1 / (1 + a)), 1 / a)),
+        (n += t.min[e][r]),
+        (i += t.max[e][r]);
+    }
+    for (r = 1; r <= this.pirates[e].length; r++) {
+      a = this.openingOdds[e][r];
+      var s = t.min[e][r],
+        o = t.max[e][r];
+      (t.min[e][r] = Math.max(s, 1 + o - i)),
+        (t.max[e][r] = Math.min(o, 1 + s - n)),
+        (t.std[e][r] = 13 == a ? 0.05 : (t.min[e][r] + t.max[e][r]) / 2);
+    }
+    for (var u = 2; u <= 13; ) {
+      var h = 0,
+        d = 0,
+        c = 0,
+        l = 1;
+      for (r = 1; r <= this.pirates[e].length; r++) {
+        (h += t.std[e][r]),
+          this.openingOdds[e][r] <= u &&
+            (d++,
+            (c += t.std[e][r] - t.min[e][r]),
+            (l = Math.min(l, t.max[e][r] - t.min[e][r])));
       }
-
-      this.moveFrom = 0;
-      this.moveTo = 0;
+      if (1 == h) {
+        break;
+      }
+      if (!(1 < h - c || 0 === d || l * d < c + 1 - h)) {
+        for (c += 1 - h, c /= d, r = 1; r <= this.pirates[e].length; r++) {
+          this.openingOdds[e][r] <= u && (t.std[e][r] = t.min[e][r] + c);
+        }
+        break;
+      }
+      u++;
+    }
+    var f = 0;
+    for (r = 1; r <= this.pirates[e].length; r++) {
+      (t.used[e][r] =
+        "custom" === this.displayMode
+          ? this.customProbabilities[e][r] || 0
+          : t.std[e][r]),
+        (f += t.used[e][r]);
+    }
+    for (r = 1; r <= this.pirates[e].length; r++) {
+      t.used[e][r] = t.used[e][r] / f;
     }
   }
+  return t;
+}
 
-  for (var i = 1; i <= numBets; i++) {
-    data.bets[i] = data.bets[i] || [0, 0, 0, 0, 0];
-    data.betAmounts[i] = -1000;
-    computedProperties["betEnabled," + i] = isEnabled.arg(i);
-    computedProperties["betOdds," + i] = odds.arg(i);
-    computedProperties["betPayoff," + i] = payoff.arg(i);
-    computedProperties["betProbability," + i] = betProbability.arg(i);
-    computedProperties["betExpectedRatio," + i] = betExpectedRatio.arg(i);
-    computedProperties["betNetExpected," + i] = betNetExpected.arg(i);
-    computedProperties["betMaxBet," + i] = betMaxBet.arg(i);
+function P() {
+  for (
+    var t = "custom" === this.displayMode ? this.customOdds : this.currentOdds,
+      e = [],
+      r = 0;
+    r < t.length;
+    r++
+  ) {
+    e[r] = [];
+    for (var n = 0; n < t[r].length; n++) {
+      e[r][n] = t[r][n];
+    }
+  }
+  return e;
+}
+
+function S() {
+  for (var t = [], e = 0; e < this.arenas.length; e++) {
+    t[e] = [];
+    for (var r = 1; r <= this.pirates[e].length; r++) {
+      t[e][r] = this.usedOdds[e][r] * this.probabilities.used[e][r] - 1;
+    }
+  }
+  return t;
+}
+
+function B() {
+  for (var t = [], e = 0; e < this.arenas.length; e++) {
+    for (var r = 0, n = 1; n <= this.pirates[e].length; n++) {
+      r += 1 / this.usedOdds[e][n];
+    }
+    (r = 1 / r - 1), (t[e] = r);
+  }
+  return t;
+}
+
+function R(t) {
+  var e = [];
+  for (var r in t) {
+    e.push({
+      value: r,
+      probability: t[r],
+    });
+  }
+  e.sort(function (t, e) {
+    return t.value - e.value;
+  });
+  for (var n = 0, i = 1, a = 0; a < e.length; a++) {
+    (n += e[a].probability),
+      (e[a].cumulative = n),
+      (e[a].tail = i),
+      (i -= e[a].probability);
+  }
+  return e;
+}
+
+function F() {
+  for (
+    var a = this.probabilities.used, h = [], e = 0, s = [0, 0, 0, 0], t = 0;
+    t < 5;
+    t++
+  ) {
+    var r = 15 << (4 * (4 - t));
+    h.push(r), (e |= r);
+    for (var n = 0; n < 4; n++) {
+      s[n] |= 1 << (4 * (4 - t) + (3 - n));
+    }
+  }
+  var i = [e].concat(s);
+  function o(t) {
+    for (var e = 0, r = 0; r < 5; r++) {
+      e |= i[t[r]] & h[r];
+    }
+    return e;
+  }
+  function d(t) {
+    return t & h[0] && t & h[1] && t & h[2] && t & h[3] && t & h[4];
+  }
+  function u(t) {
+    var s = {};
+    for (var o in ((s[e] = 0), t)) {
+      var u = t[o];
+      Object.keys(s).forEach(function (t) {
+        var e = o & t;
+        if (d(e)) {
+          var r = s[t];
+          delete s[t], (s[e] = u + r);
+          for (var n = 0; n < 5; n++) {
+            var i = h[n],
+              a = t ^ (e & i);
+            d(a) && ((s[a] = r), (t = (t & ~i) | (e & i)));
+          }
+        }
+      });
+    }
+    return s;
+  }
+  function c(t) {
+    for (var e = 1, r = 0; r < 5; r++) {
+      for (var n = 0, i = 0; i < 4; i++) {
+        t & h[r] & s[i] && (n += a[r][i + 1]);
+      }
+      e *= n;
+    }
+    return e;
+  }
+  function l(t) {
+    var e = {};
+    for (var r in t) {
+      (e[t[r]] = e[t[r]] || 0), (e[t[r]] += c(r));
+    }
+    return R(e);
+  }
+  var f = {},
+    b = {};
+  for (var p in this.bets) {
+    if (this.betEnabled[p]) {
+      var m = o(this.bets[p]);
+      (f[m] = f[m] || 0),
+        (b[m] = b[m] || 0),
+        (f[m] += this.betOdds[p]),
+        (b[m] += this.betPayoffs[p]);
+    }
+  }
+  var v = u(f),
+    g = u(b);
+  return {
+    odds: l(v),
+    winnings: l(g),
+  };
+}
+
+function M(t) {
+  for (var e = 0, r = 0; r < this.arenas.length; r++) {
+    e += this.bets[t][r];
+  }
+  return 0 < e;
+}
+
+function k(t) {
+  for (var e = 1, r = 0; r < this.arenas.length; r++) {
+    e *= this.usedOdds[r][this.bets[t][r]];
+  }
+  return e;
+}
+
+function D(t) {
+  var e = this.betAmounts[t];
+  return Math.min(1e6, e * this.betOdds[t]);
+}
+
+function N(t) {
+  for (var e = 1, r = 0; r < this.arenas.length; r++) {
+    e *= this.probabilities.used[r][this.bets[t][r]];
+  }
+  return e;
+}
+
+function L(t) {
+  return this.betOdds[t] * this.betProbabilities[t];
+}
+
+function z(t) {
+  return this.betPayoffs[t] * this.betProbabilities[t] - this.betAmounts[t];
+}
+
+function I(t) {
+  return Math.floor(1e6 / this.betOdds[t]);
+}
+
+function U(t, e) {
+  for (var r = !0, n = 0; n < this.arenas.length; n++) {
+    var i = this.bets[t][n];
+    if (0 != i && i != e[n]) {
+      r = !1;
+      break;
+    }
+  }
+  return r;
+}
+
+function W() {
+  var t = 0;
+  for (var e in this.bets) {
+    this.betEnabled[e] && (t += this.betAmounts[e]);
+  }
+  return t;
+}
+
+function H() {
+  var t = 0;
+  for (var e in this.bets) {
+    this.betEnabled[e] && (t += this.betExpectedRatios[e]);
+  }
+  return t;
+}
+
+function $() {
+  var t = 0;
+  for (var e in this.bets) {
+    this.betEnabled[e] && (t += this.betNetExpected[e]);
+  }
+  return t;
+}
+
+function J() {
+  return this.winners.some(parseFloat);
+}
+
+function nfcurl() {
+  var t = {},
+    n = "";
+  for (var s in ((t.round = this.round),
+  (t.pirates = this.pirates),
+  (t.openingOdds = this.openingOdds),
+  (t.currentOdds = this.currentOdds),
+  (t.foods = this.foods),
+  t)) {
+    n += "&" + s + "=" + JSON.stringify(t[s]);
+  }
+  return (
+    "http://foodclub.neocities.org/#" +
+    (n += "&b=" + m(this.bets) + "&a=" + y(this.betAmounts)).slice(1)
+  );
+}
+
+function q() {
+  var t = m(this.bets),
+    e = {};
+  e.round = parseInt(this.round);
+  var r = "";
+  for (var n in e) {
+    r += "&" + n + "=" + encodeURIComponent(JSON.stringify(e[n]));
+  }
+  return window.location.href + "#" + (r += "&b=" + t).slice(1);
+}
+
+function G() {
+  return this.directURL + "&a=" + y(this.betAmounts);
+}
+
+function K() {
+  var t = "[" + this.round.toString() + "](" + this.directURL + ")";
+  for (var e in ((t += "|"),
+  (t += this.arenas.join("|")),
+  (t += "|"),
+  (t += "Odds"),
+  (t += "\n"),
+  (t += ":-:|-|-|-|-|-|-:"),
+  this.bets)) {
+    if (this.betEnabled[e]) {
+      (t += "\n"), (t += e.toString());
+      for (var r = 0; r < this.arenas.length; r++) {
+        t += "|";
+        var n = this.pirates[r][this.bets[e][r] - 1];
+        n && (t += this.getPirateName(n));
+      }
+      (t += "|"), (t += this.betOdds[e].toString()), (t += ":1");
+    }
+  }
+  return t;
+}
+
+function V() {
+  var e = "TER: ";
+  (e += this.TER.toFixed(3)),
+    (e += "\n"),
+    (e += "\n"),
+    (e += "Odds|Probability|Cumulative|Tail"),
+    (e += "\n"),
+    (e += "--:|--:|--:|--:");
+  var r = 0;
+  for (var t in this.bets) {
+    this.betEnabled[t] && r++;
+  }
+  return (
+    this.payoutTables.odds.forEach(function (t) {
+      (e += "\n"),
+        (e += t.value),
+        (e += ":"),
+        (e += r),
+        (e += "|"),
+        (e += this.displayAsPercentage(t.probability, 3)),
+        (e += "|"),
+        (e += this.displayAsPercentage(t.cumulative, 3)),
+        (e += "|"),
+        (e += this.displayAsPercentage(t.tail, 3));
+    }, this),
+    e
+  );
+}
+
+function install(t) {
+  var e = {
+      5: "Edmund",
+      1: "Dan",
+      8: "Puffo",
+      3: "Orvinn",
+      17: "Federismo",
+      18: "Blackbeard",
+      13: "Ned",
+      11: "Crossblades",
+      6: "Peg Leg",
+      20: "Tailhook",
+      4: "Lucky",
+      15: "Gooblah",
+      7: "Bonnie",
+      19: "Buck",
+      2: "Sproggie",
+      10: "Squire",
+      12: "Stripey",
+      9: "Stuff",
+      16: "Franchisco",
+      14: "Fairfax",
+    },
+    r = {
+      1: "Hotfish",
+      2: "Broccoli",
+      3: "Wriggling Grub",
+      4: "Joint Of Ham",
+      5: "Rainbow Negg",
+      6: "Streaky Bacon",
+      7: "Ultimate Burger",
+      8: "Bacon Muffin",
+      9: "Hot Cakes",
+      10: "Spicy Wings",
+      11: "Apple Onion Rings",
+      12: "Sushi",
+      13: "Negg Stew",
+      14: "Ice Chocolate Cake",
+      15: "Strochal",
+      16: "Mallowicious Bar",
+      17: "Fungi Pizza",
+      18: "Broccoli and Cheese Pizza",
+      19: "Bubbling Blueberry Pizza",
+      20: "Grapity Slush",
+      21: "Rainborific Slush",
+      22: "Tangy Tropic Slush",
+      23: "Blueberry Tomato Blend",
+      24: "Lemon Blitz",
+      25: "Fresh Seaweed Pie",
+      26: "Flaming Burnumup",
+      27: "Hot Tyrannian Pepper",
+      28: "Eye Candy",
+      29: "Cheese and Tomato Sub",
+      30: "Asparagus Pie",
+      31: "Wild Chocomato",
+      32: "Cinnamon Swirl",
+      33: "Anchovies",
+      34: "Flaming Fire Faerie Pizza",
+      35: "Orange Negg",
+      36: "Fish Negg",
+      37: "Super Lemon Grape Slush",
+      38: "Rasmelon",
+      39: "Mustard Ice Cream",
+      40: "Worm and Leech Pizza",
+    },
+    n = {
+      arenas: ["Shipwreck", "Lagoon", "Treasure", "Hidden", "Harpoon"],
+      possiblePirateNames: e,
+      bets: {},
+      betAmounts: {},
+      customProbabilities: [
+        [1, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0],
+      ],
+      customOdds: [
+        [1, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0],
+      ],
+      displayMode: "normal",
+      showFAExplanation: !1,
+      showOddsTimeline: !1,
+      moveFrom: 0,
+      moveTo: 0,
+      moveMode: "none",
+      isLoading: !1,
+    };
+  for (var i in t) {
+    n[i] = t[i];
   }
 
-  vm = new Vue({
-    el: "#el",
-    data: data,
-    methods: {
-      getPirateName: function (pirateId) {
-        return pirateNames[pirateId];
-      },
-      displayAsPercentage: function (value, precision) {
-        return (value * 100).toFixed(precision) + "%";
-      },
-      displayAsPlusMinus: function (value) {
-        return (value > 0 ? "+" : "") + value;
-      },
-      displayAsDate: function (value) {
-        return new Date(value).toLocaleString();
-      },
-      setAllBets: function () {
-        for (var i = 1; i <= numBets; i++) {
-          this.betAmounts[i] = parseInt(this.maxBet);
-        }
-      },
-      piratePayoutStyle: function (payout) {
-        if (payout > 0) {
-          return "good";
-        } else if (payout <= -0.1) {
-          return "bad";
-        } else return "";
-      },
-      below0Bad: function (value) {
-        if (value < 0) {
-          return "bad";
-        } else {
-          return "";
-        }
-      },
-      hasBetWonClass: function (betNum) {
-        if (this.isBetWon(betNum, this.winners)) {
-          return "won";
-        } else if (this.winners.some(parseFloat)) {
-          // check if this.winners has a non-null value somewhere
-          return "lost";
-        } else {
-          return "";
-        }
-      },
-      hasPirateWonClass: function (arena, pirateIndex) {
-        if (
-          this.winners[arena] != 0 &&
-          this.winners[arena] == pirateIndex + 1
-        ) {
-          return "won";
-        } else if (this.winners[arena] != 0 && pirateIndex >= 0) {
-          return "lost";
-        } else {
-          return "";
-        }
-      },
-      maxBetClass: function (betNum) {
-        if (
-          this.betAmounts[betNum] > Math.ceil(1000000 / this.betOdds[betNum])
-        ) {
-          return "dangerous";
-        } else if (
-          this.betAmounts[betNum] > Math.floor(1000000 / this.betOdds[betNum])
-        ) {
-          return "warning";
-        } else {
-          return "";
-        }
-      },
-      haveOddsChanged: function (arenaId, pirateIndex) {
-        return (
-          this.openingOdds[arenaId][pirateIndex + 1] !==
-          this.currentOdds[arenaId][pirateIndex + 1]
-        );
-      },
-      isBetWon: isBetWon,
-    },
-    computed: computedProperties,
-  });
+  var config = window.NFC_CONFIG || {},
+    maxBets = parseInt(config.maxBets, 10),
+    pollIntervalMs = parseInt(config.pollIntervalMs, 10);
+  maxBets = maxBets > 0 ? maxBets : 10;
+  pollIntervalMs = pollIntervalMs > 0 ? pollIntervalMs : 1e4;
+  function a(t) {
+    var e = (function () {
+      for (
+        var e,
+          r = {},
+          t = window.location.hash.slice(1),
+          n = /([^&=]+)=([^&]*)/g;
+        (e = n.exec(t));
 
-  function refreshData() {
+      ) {
+        try {
+          r[decodeURIComponent(e[1])] = JSON.parse(decodeURIComponent(e[2]));
+        } catch (t) {
+          r[decodeURIComponent(e[1])] = decodeURIComponent(e[2]);
+        }
+      }
+      return history.pushState("", document.title, window.location.pathname), r;
+    })();
+    for (var r in e) {
+      if ("b" != r) {
+        if ("a" != r) {
+          t[r] = e[r];
+        } else {
+          var n = O(e.a);
+          t.betAmounts = n;
+        }
+      } else {
+        var i = v(e.b);
+        t.bets = i;
+      }
+    }
+  }
+  function s(t, e) {
+    return t + 2 * e;
+  }
+  a(n);
+  var o = window.Cookies.getJSON("baseMaxBet");
+  function u(t) {
+    var e = {};
+    for (var r in this) {
+      var n = r.split(",");
+      2 === n.length && n[0] === t && (e[n[1]] = this[r]);
+    }
+    return e;
+  }
+  void 0 === o
+    ? (n.maxBet = -1e3)
+    : ((n.maxBet = s(o, n.round)),
+      window.Cookies.set("baseMaxBet", o, {
+        expires: 28,
+      }));
+  var h = {
+    betEnabled: u.arg("betEnabled"),
+    betOdds: u.arg("betOdds"),
+    betPayoffs: u.arg("betPayoff"),
+    betProbabilities: u.arg("betProbability"),
+    betExpectedRatios: u.arg("betExpectedRatio"),
+    betNetExpected: u.arg("betNetExpected"),
+    betMaxBets: u.arg("betMaxBet"),
+    pirateFAs: x,
+    pirateOddsTimelines: C,
+    usedOdds: P,
+    piratePayouts: S,
+    arenaRatios: B,
+    totalAmount: W,
+    TER: H,
+    totalNetExpected: $,
+    probabilities: E,
+    payoutTables: F,
+    isRoundOver: J,
+    directURL: q,
+    directURLWithBetAmounts: G,
+    directURLnfc: nfcurl,
+    redditString: K,
+    redditStatsString: V,
+  };
+  function d() {
+    var t = this.moveFrom,
+      e = this.moveTo;
+    if (
+      "none" !== this.moveMode &&
+      t != e &&
+      this.betEnabled[t] &&
+      this.betEnabled[e]
+    ) {
+      if ("swap" === this.moveMode) {
+        var r = this.bets[t],
+          n = this.betAmounts[t];
+        (this.bets[t] = this.bets[e]),
+          (this.betAmounts[t] = this.betAmounts[e]),
+          (this.bets[e] = r),
+          (this.betAmounts[e] = n);
+      } else if ("insert" === this.moveMode) {
+        (r = this.bets[t]), (n = this.betAmounts[t]);
+        for (var i = t < e ? 1 : -1, a = t; a != e; a += i) {
+          (this.bets[a] = this.bets[a + i]),
+            (this.betAmounts[a] = this.betAmounts[a + i]);
+        }
+        (this.bets[e] = r), (this.betAmounts[e] = n);
+      }
+      (this.moveFrom = 0), (this.moveTo = 0);
+    }
+  }
+  for (var c = 1; c <= maxBets; c++) {
+    (n.bets[c] = n.bets[c] || [0, 0, 0, 0, 0]),
+      (n.betAmounts[c] = n.betAmounts[c] || -1e3),
+      (h["betEnabled," + c] = M.arg(c)),
+      (h["betOdds," + c] = k.arg(c)),
+      (h["betPayoff," + c] = D.arg(c)),
+      (h["betProbability," + c] = N.arg(c)),
+      (h["betExpectedRatio," + c] = L.arg(c)),
+      (h["betNetExpected," + c] = z.arg(c)),
+      (h["betMaxBet," + c] = I.arg(c));
+  }
+  function l() {
     if (vm.round == 1) {
-      // so we don't pull data that doesn't exist
       return;
     }
-
-    // Set loading state to prevent rendering issues
-    vm.isLoading = true;
-
     fetch("https://cdn.neofood.club/rounds/" + vm.round + ".json", {
       cache: "no-cache",
     })
-      .then(function (response) {
-        return response.json();
+      .then(function (t) {
+        return t.json();
       })
-      .then(function (data) {
-        // Validate that essential data exists before updating Vue
-        if (
-          data.pirates &&
-          data.openingOdds &&
-          data.currentOdds &&
-          data.probabilities
-        ) {
-          // Initialize custom arrays to match current round data if they come back as null from API
-          if (data.customOdds === null || data.customOdds === undefined) {
-            data.customOdds = JSON.parse(JSON.stringify(data.currentOdds));
+      .then(function (t) {
+        if (t.round == vm.round) {
+          null === t.customOdds &&
+            (t.customOdds = JSON.parse(JSON.stringify(t.currentOdds)));
+          null === t.customProbabilities &&
+            (t.customProbabilities = [
+              [1, 0, 0, 0, 0],
+              [1, 0, 0, 0, 0],
+              [1, 0, 0, 0, 0],
+              [1, 0, 0, 0, 0],
+              [1, 0, 0, 0, 0],
+            ]),
+            null == t.lastUpdate && (t.lastUpdate = t.timestamp);
+          for (var e in t) {
+            vm[e] = t[e];
           }
-          if (
-            data.customProbabilities === null ||
-            data.customProbabilities === undefined
-          ) {
-            // We'll calculate the standard probabilities and convert to percentages like the displayMode watcher does
-            var tempProbabilities = [];
-            for (var i = 0; i < 5; i++) {
-              tempProbabilities[i] = [];
-              for (var j = 0; j <= 4; j++) {
-                tempProbabilities[i][j] = j === 0 ? 1 : 0; // Will be properly calculated after data is loaded
-              }
-            }
-            data.customProbabilities = tempProbabilities;
-          }
-
-          // Update properties safely using Vue's reactivity system
-          vm.$nextTick(function () {
-            for (var key in data) {
-              vm.$set(vm, key, data[key]);
-            }
-            vm.isLoading = false;
-          });
-        } else {
-          console.error("Incomplete data received for round " + vm.round);
-          vm.isLoading = false;
         }
       })
-      .catch(function (error) {
-        console.error("Error fetching round data:", error);
-        vm.isLoading = false;
-      });
+      .catch(function () {});
   }
-  vm.$watch("round", refreshData, { immediate: true });
-  vm.$watch("maxBet", function (newVal) {
-    baseMaxBet = getBaseMaxBet(newVal, vm.round);
-    window.Cookies.set("baseMaxBet", baseMaxBet, { expires: 28 });
-  });
-  vm.$watch(
-    "round",
-    function (newVal) {
-      if (baseMaxBet !== undefined) {
-        this.maxBet = getMaxBet(baseMaxBet, newVal);
-      }
+  (vm = new Vue({
+    el: "#el",
+    data: n,
+    methods: {
+      getPirateName: function (t) {
+        return e[t];
+      },
+      getFoodName: function (t) {
+        return r[t];
+      },
+      displayAsPercentage: function (t, e) {
+        return (100 * t).toFixed(e) + "%";
+      },
+      displayAsPlusMinus: function (t) {
+        return (0 < t ? "+" : "") + t;
+      },
+      displayFAFoodPirate: function (t, e) {
+        var r = A[t][e],
+          n = T[t][e];
+        return r && n ? "+" + r + "/-" + n : r ? "+" + r : n ? "-" + n : "";
+      },
+      displayFAFoodPirateClass: function (t, e) {
+        var r = A[t][e],
+          n = T[t][e],
+          i = "piratefoodFA";
+        return r && n
+          ? i + " complicated"
+          : r
+          ? i + " good"
+          : n
+          ? i + " bad"
+          : i;
+      },
+      displayAsDate: function (t) {
+        return new Date(t).toLocaleString();
+      },
+      setAllBets: function () {
+        for (var t = 1; t <= maxBets; t++) {
+          this.betAmounts[t] = parseInt(this.maxBet);
+        }
+      },
+      piratePayoutStyle: function (t) {
+        return 0 < t ? "good" : t <= -0.1 ? "bad" : "";
+      },
+      below0Bad: function (t) {
+        return t < 0 ? "bad" : "";
+      },
+      hasBetWonClass: function (t) {
+        return this.isBetWon(t, this.winners)
+          ? "won"
+          : this.isRoundOver
+          ? "lost"
+          : "";
+      },
+      hasPirateWonClass: function (t, e) {
+        return 0 != this.winners[t] && this.winners[t] == e + 1
+          ? "won"
+          : 0 != this.winners[t] && 0 <= e
+          ? "lost"
+          : "";
+      },
+      maxBetClass: function (t) {
+        return this.betAmounts[t] > Math.ceil(1e6 / this.betOdds[t])
+          ? "dangerous"
+          : this.betAmounts[t] > Math.floor(1e6 / this.betOdds[t])
+          ? "warning"
+          : "";
+      },
+      totalWinningPayoff: function () {
+        if (!this.isRoundOver) {
+          return "";
+        }
+        var t = 0;
+        for (var i in this.bets) {
+          this.betEnabled[i] &&
+            this.isBetWon(i, this.winners) &&
+            (t += this.betPayoffs[i]);
+        }
+        return t + " NP";
+      },
+      totalWinningOdds: function () {
+        if (!this.isRoundOver) {
+          return "";
+        }
+        var t = 0,
+          i = 0;
+        for (var n in this.bets) {
+          this.betEnabled[n] &&
+            (i++, this.isBetWon(n, this.winners) && (t += this.betOdds[n]));
+        }
+        return t + ":" + i;
+      },
+      haveOddsChanged: function (t, e) {
+        return this.openingOdds[t][e + 1] !== this.currentOdds[t][e + 1];
+      },
+      computeColspan: function (t) {
+        return (
+          10 +
+          (this.showFAExplanation ? 10 : 0) +
+          (this.showOddsTimeline ? 1 : 0) +
+          ("custom" === this.displayMode ? 3 : 0) +
+          t
+        );
+      },
+      timestampClass: function () {
+        var t = new Date(this.timestamp).getTime();
+        return !this.isRoundOver && 3e5 < Date.now() - t ? "error" : "";
+      },
+      lastUpdateClass: function () {
+        var t = new Date(this.lastUpdate).getTime();
+        return !this.isRoundOver && 24e5 < Date.now() - t
+          ? "error"
+          : !this.isRoundOver && 3e5 < Date.now() - t
+          ? "warning"
+          : "";
+      },
+      isBetWon: U,
+      tenBet: function (t, e) {
+        for (var r in this.bets) {
+          this.$set(this.bets[r], t, e);
+        }
+      },
+      saveMaxBet: function () {
+        var t, e;
+        (t = this.maxBet),
+          (e = this.round),
+          (o = t - 2 * e),
+          window.Cookies.set("baseMaxBet", o, {
+            expires: 28,
+          });
+      },
     },
-    { immediate: true }
-  );
-  vm.$watch("moveFrom", moveBets);
-  vm.$watch("moveTo", moveBets);
-  setInterval(refreshData, 1 * 15 * 1000);
+    computed: h,
+  })).$watch("round", l, {
+    immediate: !0,
+  }),
+    vm.$watch(
+      "round",
+      function (t) {
+        void 0 !== o && (this.maxBet = s(o, t));
+      },
+      {
+        immediate: !0,
+      }
+    ),
+    vm.$watch("moveFrom", d),
+    vm.$watch("moveTo", d),
+    vm.$watch(
+      "displayMode",
+      function () {
+        for (var t = 0; t < this.arenas.length; t++) {
+          for (j = 1; j <= this.pirates[t].length; j++) {
+            (this.customProbabilities[t][j] =
+              100 * this.probabilities.std[t][j]),
+              this.$set(this.customOdds[t], j, this.currentOdds[t][j]);
+          }
+        }
+      },
+      {
+        immediate: !0,
+      }
+    ),
+    window.addEventListener("hashchange", a.arg(vm)),
+    setInterval(l, pollIntervalMs);
 }
+
+Function.prototype.arg = function () {
+  if ("function" != typeof this) {
+    throw new TypeError(
+      "Function.prototype.arg needs to be called on a function"
+    );
+  }
+  var t = Array.prototype.slice,
+    e = t.call(arguments),
+    r = this,
+    n = function () {
+      return r.apply(this, e.concat(t.call(arguments)));
+    };
+  return (n.prototype = Object.create(this.prototype)), n;
+};
+
+(function () {
+  install({
+    pirates: [
+      [6, 2, 15, 14],
+      [17, 10, 1, 9],
+      [12, 16, 19, 18],
+      [8, 13, 3, 4],
+      [5, 7, 11, 20],
+    ],
+    openingOdds: [
+      [1, 13, 13, 2, 13],
+      [1, 2, 13, 2, 13],
+      [1, 13, 3, 2, 4],
+      [1, 11, 3, 4, 2],
+      [1, 2, 9, 13, 2],
+    ],
+    currentOdds: [
+      [1, 13, 13, 2, 13],
+      [1, 2, 13, 2, 13],
+      [1, 13, 3, 2, 4],
+      [1, 11, 3, 4, 2],
+      [1, 2, 9, 13, 2],
+    ],
+    changes: null,
+    round: 1,
+    start: "2019-09-11T00:29:51.7768357+02:00",
+    timestamp: "2019-09-29T07:46:48.9377422+02:00",
+    lastUpdate: "2019-09-11T07:53:51.6877869+02:00",
+    lastChange: "2019-09-11T00:29:51.7768357+02:00",
+    winners: [0, 0, 0, 0, 0],
+    isLoading: false,
+    foods: [
+      [25, 4, 2, 34, 28, 17, 26, 7, 12, 35],
+      [7, 19, 21, 34, 39, 33, 10, 18, 31, 28],
+      [9, 13, 22, 4, 26, 32, 35, 38, 30, 40],
+      [40, 38, 20, 23, 26, 15, 1, 8, 6, 18],
+      [34, 3, 31, 21, 40, 39, 23, 33, 13, 27],
+    ],
+  });
+
+  fetch("https://cdn.neofood.club/current_round.txt", {
+    cache: "no-cache",
+  })
+    .then(function (t) {
+      return t.text();
+    })
+    .then(function (t) {
+      if (vm && vm.round === 1) vm.round = parseInt(t);
+    });
+})();

@@ -25,6 +25,11 @@ var pirate_combo = {};
 var betcaps = {};
 var top_ratios = [];
 
+var config = window.NFC_CONFIG || {};
+var configuredMaxBets = parseInt(config.maxBets, 10);
+if (!(configuredMaxBets > 0)) configuredMaxBets = 10;
+var maxBets = old_page ? Math.min(configuredMaxBets, 10) : configuredMaxBets;
+
 // Takes in 5 pirates and calculates the win rate, winnings, and net expected for each pirate
 function calculateCombination(a, b, c, d, e) {
   var odds,
@@ -76,6 +81,10 @@ function calculateCombination(a, b, c, d, e) {
 
 // The main method
 function calc_maxter() {
+  if (typeof vm === "undefined" || vm === null) {
+    alert("NeoFoodClub hasn't finished loading yet. Try again in a moment.");
+    return;
+  }
   if (vm.maxBet <= 0) {
     alert(
       "Please input a Max Personal Bet value greater than 0 (located at the bottom of the table)."
@@ -114,7 +123,7 @@ function calc_maxter() {
 
   var bet, arena, pirate;
   var result = "";
-  for (bet = 0; bet < 10; bet++) {
+  for (bet = 0; bet < maxBets; bet++) {
     // Set the bet amounts for each bet
     vm.betAmounts[bet + 1] = betcaps[top_ratios[bet][0]];
     // Parse the pirate combinations to generate a link containing the MAX TER bets
@@ -125,6 +134,8 @@ function calc_maxter() {
     }
   }
   if (old_page) return;
+
+  if (result.length % 2 === 1) result += "0";
 
   var linkCode = "";
   for (i = 0; i < result.length; i += 2) {

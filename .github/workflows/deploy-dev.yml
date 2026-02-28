@@ -46,19 +46,5 @@ jobs:
             fi
           done
 
-          # Upload 15/ directory files
-          if [ -d "15" ]; then
-            cd 15
-            for file in *; do
-              if [ -f "$file" ]; then
-                remote_path="dev/15/$file"
-                echo "Uploading 15/$file to $remote_path..."
-                curl -F "${remote_path}=@${file}" \
-                  -H "Authorization: Bearer $NEOCITIES_API_KEY" \
-                  https://neocities.org/api/upload
-              fi
-            done
-          fi
-
           echo "✓ Deployment to /dev/ complete!"
 
