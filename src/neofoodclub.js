@@ -2405,19 +2405,27 @@ function nfcurl() {
 }
 
 function q() {
-  var t = m(this.bets),
-    e = {};
+  var e = {};
   e.round = parseInt(this.round);
   var r = "";
   for (var n in e) {
     r += "&" + n + "=" + encodeURIComponent(JSON.stringify(e[n]));
   }
+  var hasBets = Object.keys(this.bets).some(function (k) {
+    return M.call(this, k);
+  }, this);
+  if (hasBets) r += "&b=" + m(this.bets);
   var base = window.location.origin + window.location.pathname + window.location.search;
-  return base + "#" + (r += "&b=" + t).slice(1);
+  return base + "#" + r.slice(1);
 }
 
 function G() {
-  return this.directURL + "&a=" + y(this.betAmounts);
+  var url = this.directURL;
+  var hasAmounts = Object.keys(this.betAmounts).some(function (k) {
+    return this.betAmounts[k] > -1e3;
+  }, this);
+  if (hasAmounts) url += "&a=" + y(this.betAmounts);
+  return url;
 }
 
 function K() {
