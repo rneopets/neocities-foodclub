@@ -2405,18 +2405,35 @@ function nfcurl() {
 }
 
 function q() {
-  var t = m(this.bets),
-    e = {};
+  var e = {};
   e.round = parseInt(this.round);
   var r = "";
   for (var n in e) {
     r += "&" + n + "=" + encodeURIComponent(JSON.stringify(e[n]));
   }
-  return window.location.href + "#" + (r += "&b=" + t).slice(1);
+  var hasBets = false;
+  for (var k in this.betEnabled) {
+    if (this.betEnabled[k]) {
+      hasBets = true;
+      break;
+    }
+  }
+  if (hasBets) r += "&b=" + m(this.bets);
+  var base = window.location.origin + window.location.pathname + window.location.search;
+  return base + "#" + r.slice(1);
 }
 
 function G() {
-  return this.directURL + "&a=" + y(this.betAmounts);
+  var url = this.directURL;
+  var hasAmounts = false;
+  for (var k in this.betEnabled) {
+    if (this.betEnabled[k] && this.betAmounts[k] > -1e3) {
+      hasAmounts = true;
+      break;
+    }
+  }
+  if (hasAmounts) url += "&a=" + y(this.betAmounts);
+  return url;
 }
 
 function K() {
@@ -2571,6 +2588,7 @@ function install(t) {
     pollIntervalMs = parseInt(config.pollIntervalMs, 10);
   maxBets = maxBets > 0 ? maxBets : 10;
   pollIntervalMs = pollIntervalMs > 0 ? pollIntervalMs : 1e4;
+  var syncingFromHash = !1;
   function a(t) {
     var e = (function () {
       for (
@@ -2587,7 +2605,7 @@ function install(t) {
           r[decodeURIComponent(e[1])] = decodeURIComponent(e[2]);
         }
       }
-      return history.pushState("", document.title, window.location.pathname), r;
+      return r;
     })();
     for (var r in e) {
       if ("b" != r) {
@@ -2602,6 +2620,13 @@ function install(t) {
         t.bets = i;
       }
     }
+  }
+  function onHashChange() {
+    syncingFromHash = !0;
+    a(vm);
+    vm.$nextTick(function () {
+      syncingFromHash = !1;
+    });
   }
   function s(t, e) {
     return t + 2 * e;
@@ -2877,7 +2902,21 @@ function install(t) {
         immediate: !0,
       }
     ),
-    window.addEventListener("hashchange", a.arg(vm)),
+    window.addEventListener("hashchange", onHashChange),
+    vm.$watch(
+      "directURLWithBetAmounts",
+      function (newUrl) {
+        if (syncingFromHash) return;
+        var hashIdx = newUrl.indexOf("#");
+        if (hashIdx !== -1) {
+          var hash = newUrl.substring(hashIdx + 1);
+          if (window.location.hash !== "#" + hash) {
+            history.replaceState(null, "", newUrl);
+          }
+        }
+      },
+      { immediate: !0 }
+    ),
     setInterval(l, pollIntervalMs);
 }
 
