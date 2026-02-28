@@ -2411,9 +2411,19 @@ function q() {
   for (var n in e) {
     r += "&" + n + "=" + encodeURIComponent(JSON.stringify(e[n]));
   }
-  var hasBets = Object.keys(this.bets).some(function (k) {
-    return M.call(this, k);
-  }, this);
+  var hasBets = false;
+  for (var k in this.bets) {
+    var bet = this.bets[k];
+    if (bet) {
+      for (var j = 0; j < 5; j++) {
+        if (bet[j]) {
+          hasBets = true;
+          break;
+        }
+      }
+    }
+    if (hasBets) break;
+  }
   if (hasBets) r += "&b=" + m(this.bets);
   var base = window.location.origin + window.location.pathname + window.location.search;
   return base + "#" + r.slice(1);
@@ -2421,9 +2431,14 @@ function q() {
 
 function G() {
   var url = this.directURL;
-  var hasAmounts = Object.keys(this.betAmounts).some(function (k) {
-    return this.betAmounts[k] > -1e3;
-  }, this);
+  var hasAmounts = false;
+  for (var k in this.betAmounts) {
+    var amt = this.betAmounts[k];
+    if (amt != null && amt > -1e3) {
+      hasAmounts = true;
+      break;
+    }
+  }
   if (hasAmounts) url += "&a=" + y(this.betAmounts);
   return url;
 }
