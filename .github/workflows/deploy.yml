@@ -5,10 +5,22 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      deploy_target:
+        description: 'Deploy target'
+        required: true
+        default: 'prod'
+        type: choice
+        options:
+          - prod
+          - dev
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      DEPLOY_TARGET: ${{ github.event.inputs.deploy_target || 'prod' }}
+      DEPLOY_PREFIX: ${{ github.event.inputs.deploy_target == 'dev' && 'dev/' || '' }}
 
     steps:
       - name: Checkout repository
@@ -27,8 +39,17 @@ jobs:
         run: npm run build
 
       - name: Deploy to Neocities
-        uses: bcomnes/deploy-to-neocities@v3
-        with:
-          api_key: ${{ secrets.NEOCITIES_API_TOKEN }}
-          cleanup: true
-          dist_dir: public
+        env:
+          NEOCITIES_API_KEY: ${{ secrets.NEOCITIES_API_KEY }}
+        run: |
+          cd public
+          for file in *.html *.js *.css; do
+            if [ -f "$file" ]; then
+              remote="${DEPLOY_PREFIX}${file}"
+              echo "Uploading $file to $remote..."
+              curl -F "${remote}=@${file}" \
+                -H "Authorization: Bearer $NEOCITIES_API_KEY" \
+                https://neocities.org/api/upload
+            fi
+          done
+          echo "✓ Deployment complete!"
