@@ -1,0 +1,64 @@
+name: Deploy to Dev
+
+on:
+  workflow_dispatch:  # Deploy from any branch via manual trigger
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Upload to Neocities /dev/
+        env:
+          NEOCITIES_API_KEY: ${{ secrets.NEOCITIES_API_KEY }}
+        run: |
+          # Upload files to /dev/ directory
+          cd public
+
+          # Function to upload a file
+          upload_file() {
+            local file="$1"
+            local remote_path="dev/$file"
+            echo "Uploading $file to $remote_path..."
+            curl -F "${remote_path}=@${file}" \
+              -H "Authorization: Bearer $NEOCITIES_API_KEY" \
+              https://neocities.org/api/upload
+          }
+
+          # Upload root files
+          for file in *.html *.js *.css; do
+            if [ -f "$file" ]; then
+              upload_file "$file"
+            fi
+          done
+
+          # Upload 15/ directory files
+          if [ -d "15" ]; then
+            cd 15
+            for file in *; do
+              if [ -f "$file" ]; then
+                remote_path="dev/15/$file"
+                echo "Uploading 15/$file to $remote_path..."
+                curl -F "${remote_path}=@${file}" \
+                  -H "Authorization: Bearer $NEOCITIES_API_KEY" \
+                  https://neocities.org/api/upload
+              fi
+            done
+          fi
+
+          echo "✓ Deployment to /dev/ complete!"
+
