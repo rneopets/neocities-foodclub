@@ -37,21 +37,22 @@ console.log("Building...\n");
 const srcDir = path.join(__dirname, "src");
 
 const files = [
-  "neofoodclub.js",
-  "scripts.js",
-  "style.css",
-  "index.html",
+  { src: "neofoodclub.js", out: "neofoodclub.min.js" },
+  { src: "scripts.js", out: "scripts.js" },
+  { src: "style.css", out: "style.css" },
+  { src: "index.html", out: "index.html" },
 ];
 
 for (const file of files) {
-  const srcPath = path.join(srcDir, file);
+  const srcPath = path.join(srcDir, typeof file === "string" ? file : file.src);
+  const outName = typeof file === "string" ? path.basename(file) : file.out;
   if (fs.existsSync(srcPath)) {
-    const outPath = path.join(distDir, path.basename(file));
-    if (file.endsWith(".js")) {
+    const outPath = path.join(distDir, outName);
+    if (outName.endsWith(".js")) {
       minifyJS(srcPath, outPath);
-    } else if (file.endsWith(".css")) {
+    } else if (outName.endsWith(".css")) {
       minifyCSS(srcPath, outPath);
-    } else if (file.endsWith(".html")) {
+    } else if (outName.endsWith(".html")) {
       minifyHTML(srcPath, outPath);
     }
   }
