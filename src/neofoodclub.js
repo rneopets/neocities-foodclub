@@ -2874,6 +2874,23 @@ function install(t) {
       setBetsFromLinkCode: function (t) {
         this.bets = v(t);
       },
+      generate_bet_link: function (bet, betNum) {
+        var urlString =
+          "http://www.neopets.com/pirates/process_foodclub.phtml?";
+        for (var i = 0; i < 5; i++) {
+          if (bet[i] != 0)
+            urlString +=
+              "winner" + (i + 1) + "=" + this.pirates[i][bet[i] - 1] + "&";
+        }
+        for (var i = 0; i < 5; i++) {
+          if (bet[i] != 0) urlString += "matches[]=" + (i + 1) + "&";
+        }
+        urlString += "bet_amount=" + this.betAmounts[betNum] + "&";
+        urlString += "total_odds=" + this.betOdds[betNum] + "&";
+        urlString += "winnings=" + this.betPayoffs[betNum] + "&";
+        urlString += "type=bet";
+        return "window.open('" + urlString + "')";
+      },
     },
     computed: h,
   })).$watch("round", l, {
